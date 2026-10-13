@@ -1,0 +1,6 @@
+{
+  "name": "FlavorCraft Restaurant Ordering System",
+  "description": "A responsive single-page restaurant ordering system with customer food menu, slide-out cart drawer, checkout, and admin management dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

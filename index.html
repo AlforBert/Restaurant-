@@ -1,0 +1,1895 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlavorCraft Restaurant Ordering System</title>
+    <meta name="description" content="A responsive single-page restaurant ordering system with customer food menu, slide-out cart drawer, checkout, and admin management dashboard." />
+    <meta property="og:title" content="FlavorCraft Restaurant Ordering System" />
+    <meta property="og:description" content="A responsive single-page restaurant ordering system with customer food menu, slide-out cart drawer, checkout, and admin management dashboard." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#fff7ed',
+                100: '#ffedd5',
+                200: '#fed7aa',
+                300: '#fdba74',
+                400: '#fb923c',
+                500: '#f97316',
+                600: '#ea580c',
+                700: '#c2410c',
+                800: '#9a3412',
+                900: '#7c2d12',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      /* Custom smooth drawer scrollbar */
+      .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+  </head>
+  <body class="min-h-full flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Sticky Header -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all duration-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          
+          <!-- Brand Logo & Live status -->
+          <div class="flex items-center gap-4 cursor-pointer" onclick="app.switchView('customer')">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xl font-extrabold tracking-tight text-slate-900">FlavorCraft</span>
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Open Now
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">Artisan Burgers & Craft Kitchen</p>
+            </div>
+          </div>
+
+          <!-- Header Right Navigation & Actions -->
+          <div class="flex items-center gap-3 sm:gap-4">
+            
+            <!-- View Mode Switcher Toggle -->
+            <div id="view-mode-toggle" class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+              <button id="toggle-customer-btn" onclick="app.switchView('customer')" 
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 bg-white text-slate-900 shadow-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                  <path d="M7 2v20"></path>
+                  <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                </svg>
+                <span>Customer Menu</span>
+              </button>
+              <button id="toggle-admin-btn" onclick="app.switchView('admin')" 
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 text-slate-600 hover:text-slate-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <span>Admin Dashboard</span>
+              </button>
+            </div>
+
+            <!-- Cart Trigger Button -->
+            <button id="cart-header-btn" onclick="app.toggleCart(true)" 
+              class="relative flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 active:scale-95 transition-all shadow-sm shadow-brand-500/25">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                <path d="M3 6h18"></path>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span class="hidden sm:inline">Cart</span>
+              <span id="header-cart-total" class="hidden md:inline font-bold border-l border-brand-500/80 pl-2.5 text-xs">$0.00</span>
+              <span id="header-cart-badge" class="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-white text-brand-700 font-extrabold text-[11px] leading-none shadow-xs">
+                0
+              </span>
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin View Banner Indicator (Visible only in Admin mode) -->
+    <div id="admin-mode-banner" class="hidden bg-slate-900 text-slate-200 border-b border-slate-800 py-2 px-4">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          <span class="font-bold text-amber-300">Admin Mode Active:</span>
+          <span class="text-slate-300">Manage incoming orders, update delivery statuses, or publish new menu items in real-time.</span>
+        </div>
+        <button onclick="app.switchView('customer')" class="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2">
+          Return to Customer Storefront &rarr;
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <!-- VIEW 1: CUSTOMER FOOD STOREFRONT -->
+      <section id="customer-view" class="space-y-8">
+        
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-amber-950 text-white p-6 sm:p-10 shadow-lg">
+          <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="relative z-10 max-w-2xl">
+            <div class="inline-flex items-center gap-2 text-brand-400 text-xs font-bold tracking-wider uppercase mb-2">
+              <span>Chef-Crafted Daily</span>
+              <span>·</span>
+              <span>100% Angus & Fresh Ingredients</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3">
+              Crafted with Flavor, <br class="hidden sm:inline"/>Delivered to Your Door.
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+              Indulge in smash burgers seared to perfection, handcrafted artisan sodas & nitro cold brews, and decadent scratch desserts. Cash on delivery accepted.
+            </p>
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300 font-medium">
+              <div class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Avg. Delivery: 25-35 Mins</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>Cash on Delivery</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Free Delivery Over $35</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls Bar: Category Filters & Search Bar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+          
+          <!-- Category Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="category-tabs-container">
+            <button onclick="app.setCategory('all')" data-cat="all"
+              class="cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-brand-600 text-white shadow-xs">
+              All Items (<span id="cat-count-all">0</span>)
+            </button>
+            <button onclick="app.setCategory('burgers')" data-cat="burgers"
+              class="cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 bg-white border border-slate-200">
+              Burgers (<span id="cat-count-burgers">0</span>)
+            </button>
+            <button onclick="app.setCategory('drinks')" data-cat="drinks"
+              class="cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 bg-white border border-slate-200">
+              Drinks (<span id="cat-count-drinks">0</span>)
+            </button>
+            <button onclick="app.setCategory('desserts')" data-cat="desserts"
+              class="cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 bg-white border border-slate-200">
+              Desserts (<span id="cat-count-desserts">0</span>)
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full md:w-72">
+            <input 
+              type="text" 
+              id="menu-search-input" 
+              oninput="app.handleSearch(this.value)"
+              placeholder="Search burgers, drinks..." 
+              class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-2xs"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <button id="clear-search-btn" onclick="app.clearSearch()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Food Menu Grid -->
+        <div id="food-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Empty Menu State (if search/filter yields zero) -->
+        <div id="menu-empty-state" class="hidden text-center py-16 px-4 bg-white rounded-2xl border border-slate-200">
+          <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-1">No items found</h3>
+          <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">We couldn't find any food items matching your search. Try another keyword or switch categories.</p>
+          <button onclick="app.resetFilters()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
+            Reset Filters
+          </button>
+        </div>
+
+      </section>
+
+      <!-- VIEW 2: ADMIN DASHBOARD -->
+      <section id="admin-view" class="hidden space-y-8">
+        
+        <!-- Admin Dashboard Header & Quick Stats -->
+        <div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Admin Operations Center</h2>
+              <p class="text-xs sm:text-sm text-slate-500">Track and fulfill customer orders in real-time and manage your restaurant menu catalog.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="app.seedSampleOrder()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200/80 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>Simulate New Incoming Order</span>
+              </button>
+              <button onclick="app.switchView('customer')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs">
+                View Customer Storefront &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-500">Total Revenue</span>
+                <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="text-2xl font-black text-slate-900" id="admin-stat-revenue">$0.00</div>
+              <p class="text-[11px] text-slate-400 mt-1">Cash on Delivery collected</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-500">Total Orders</span>
+                <span class="p-2 bg-brand-50 text-brand-600 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="text-2xl font-black text-slate-900" id="admin-stat-orders">0</div>
+              <p class="text-[11px] text-slate-400 mt-1">Lifetime placed orders</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-500">Active Kitchen Orders</span>
+                <span class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </span>
+              </div>
+              <div class="text-2xl font-black text-slate-900" id="admin-stat-active">0</div>
+              <p class="text-[11px] text-amber-600 font-semibold mt-1">Pending & Preparing</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-500">Menu Catalog</span>
+                <span class="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="text-2xl font-black text-slate-900" id="admin-stat-items">0</div>
+              <p class="text-[11px] text-slate-400 mt-1">Active items on menu</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2 Column Admin Layout: Orders Table (Col 1) and Add New Menu Item Form (Col 2) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- LEFT / MAIN: Order Status Table (8 cols on lg) -->
+          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            
+            <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="font-extrabold text-base text-slate-900">Orders Status Management</h3>
+                <p class="text-xs text-slate-500">Update order status as kitchen prepares and couriers deliver.</p>
+              </div>
+
+              <!-- Status filter buttons -->
+              <div class="flex items-center gap-1.5 overflow-x-auto" id="order-status-filters">
+                <button onclick="app.setOrderFilter('all')" data-status="all" class="order-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white">
+                  All (<span id="count-order-all">0</span>)
+                </button>
+                <button onclick="app.setOrderFilter('pending')" data-status="pending" class="order-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                  Pending (<span id="count-order-pending">0</span>)
+                </button>
+                <button onclick="app.setOrderFilter('preparing')" data-status="preparing" class="order-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                  Preparing (<span id="count-order-preparing">0</span>)
+                </button>
+                <button onclick="app.setOrderFilter('delivered')" data-status="delivered" class="order-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                  Delivered (<span id="count-order-delivered">0</span>)
+                </button>
+              </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                    <th class="py-3 px-4">Order ID & Date</th>
+                    <th class="py-3 px-4">Customer</th>
+                    <th class="py-3 px-4">Items Breakdown</th>
+                    <th class="py-3 px-4">Total</th>
+                    <th class="py-3 px-4">Status & Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-orders-table-body" class="divide-y divide-slate-100">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+
+              <!-- Empty state for orders table -->
+              <div id="admin-orders-empty" class="hidden text-center py-12 px-4 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p class="font-bold text-slate-700">No orders in this category</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Switch filters or place an order from the customer storefront.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT / SIDE: Form to Add New Menu Item (4 cols on lg) -->
+          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[11px] font-bold mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Menu Management
+              </div>
+              <h3 class="font-extrabold text-lg text-slate-900">Add New Menu Item</h3>
+              <p class="text-xs text-slate-500">Newly added dishes will immediately appear in the customer food catalog.</p>
+            </div>
+
+            <form id="add-menu-item-form" onsubmit="app.handleAddNewMenuItem(event)" class="space-y-4">
+              
+              <!-- Item Title -->
+              <div>
+                <label for="item-title" class="block text-xs font-bold text-slate-700 mb-1">Item Title <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  id="item-title" 
+                  required 
+                  placeholder="e.g. Smoky Hickory BBQ Burger" 
+                  class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                />
+              </div>
+
+              <!-- Category & Price in 2 cols -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="item-category" class="block text-xs font-bold text-slate-700 mb-1">Category <span class="text-rose-500">*</span></label>
+                  <select 
+                    id="item-category" 
+                    required 
+                    class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                    <option value="burgers">Burgers</option>
+                    <option value="drinks">Drinks</option>
+                    <option value="desserts">Desserts</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="item-price" class="block text-xs font-bold text-slate-700 mb-1">Price ($) <span class="text-rose-500">*</span></label>
+                  <input 
+                    type="number" 
+                    id="item-price" 
+                    step="0.01" 
+                    min="0.50" 
+                    max="999.00" 
+                    required 
+                    placeholder="12.99" 
+                    class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label for="item-description" class="block text-xs font-bold text-slate-700 mb-1">Description <span class="text-rose-500">*</span></label>
+                <textarea 
+                  id="item-description" 
+                  rows="2" 
+                  required 
+                  placeholder="Fresh toasted brioche bun, double cheddar, caramelized onions, house aioli..." 
+                  class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none"></textarea>
+              </div>
+
+              <!-- Image URL with quick presets -->
+              <div>
+                <label for="item-image" class="block text-xs font-bold text-slate-700 mb-1">Image URL <span class="text-rose-500">*</span></label>
+                <input 
+                  type="url" 
+                  id="item-image" 
+                  required 
+                  placeholder="https://images.unsplash.com/..." 
+                  class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                />
+
+                <!-- Quick Presets -->
+                <div class="mt-2">
+                  <span class="text-[11px] text-slate-500 block mb-1">Quick high-res sample presets:</span>
+                  <div class="flex flex-wrap gap-1.5 text-[10px]">
+                    <button type="button" onclick="app.fillSampleImage('burger')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-700 font-semibold transition-colors">
+                      🍔 Burger
+                    </button>
+                    <button type="button" onclick="app.fillSampleImage('drink')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-700 font-semibold transition-colors">
+                      🍹 Craft Soda
+                    </button>
+                    <button type="button" onclick="app.fillSampleImage('coffee')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-700 font-semibold transition-colors">
+                      ☕ Cold Brew
+                    </button>
+                    <button type="button" onclick="app.fillSampleImage('dessert')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-700 font-semibold transition-colors">
+                      🍰 Cheesecake
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button 
+                type="submit" 
+                class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 active:scale-98 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-brand-500/20 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Publish Dish to Menu
+              </button>
+
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Menu Catalog Quick Management in Admin -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-extrabold text-base text-slate-900">Current Menu Inventory</h3>
+              <p class="text-xs text-slate-500">Live items visible to customers. You can remove or review items here.</p>
+            </div>
+            <span class="text-xs font-bold text-slate-400" id="admin-inventory-count">12 Items Active</span>
+          </div>
+
+          <div id="admin-inventory-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold text-slate-900">FlavorCraft Restaurant</span>
+          <span>·</span>
+          <span>Single-Page In-Memory Ordering System</span>
+        </div>
+        <div class="flex items-center gap-4 text-slate-400">
+          <span>Delivery Hours: 11:00 AM – 11:00 PM</span>
+          <span>·</span>
+          <span>Payment: Cash on Delivery</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- SLIDE-OUT CART DRAWER & MODAL BACKDROP -->
+    <!-- ========================================== -->
+    <div id="cart-drawer-backdrop" onclick="app.toggleCart(false)" 
+      class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 opacity-0 pointer-events-none transition-opacity duration-300">
+    </div>
+
+    <aside id="cart-drawer" 
+      class="fixed inset-y-0 right-0 z-50 w-full sm:max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+      
+      <!-- Cart Drawer Header -->
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-base leading-tight">Your Order Cart</h3>
+            <p class="text-[11px] text-slate-500 font-medium" id="drawer-item-count-text">0 items selected</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button onclick="app.clearCart()" id="clear-cart-btn" title="Clear all items" class="text-slate-400 hover:text-rose-600 text-xs px-2 py-1 rounded transition-colors hidden">
+            Clear
+          </button>
+          <button onclick="app.toggleCart(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Free Delivery Progress Hint -->
+      <div id="free-delivery-banner" class="px-5 py-2.5 bg-amber-50 border-b border-amber-200/60 text-xs text-amber-900">
+        <div class="flex items-center justify-between mb-1 text-[11px] font-bold">
+          <span id="free-delivery-text">Add $35.00 for FREE Delivery</span>
+          <span id="free-delivery-percent">0%</span>
+        </div>
+        <div class="w-full bg-amber-200/60 h-1.5 rounded-full overflow-hidden">
+          <div id="free-delivery-bar" class="bg-brand-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <!-- Cart Drawer Body (Scrollable items + checkout form) -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-5 space-y-6">
+        
+        <!-- Cart Items List Container -->
+        <div id="cart-items-list" class="space-y-3">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Empty Cart Display -->
+        <div id="cart-empty-view" class="text-center py-16 px-4">
+          <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center text-slate-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <h4 class="font-extrabold text-slate-800 text-sm mb-1">Your cart is empty</h4>
+          <p class="text-xs text-slate-400 mb-5">Looks like you haven't added any burgers, drinks, or desserts yet.</p>
+          <button onclick="app.toggleCart(false)" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs">
+            Browse Delicious Menu
+          </button>
+        </div>
+
+        <!-- Checkout Form Section (Visible when cart has items) -->
+        <div id="cart-checkout-section" class="pt-4 border-t border-slate-200 space-y-4 hidden">
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900 mb-0.5">Delivery Details</h4>
+            <p class="text-[11px] text-slate-500">Provide your address for speedy courier dispatch.</p>
+          </div>
+
+          <form id="checkout-form" onsubmit="app.handlePlaceOrder(event)" class="space-y-3">
+            
+            <!-- Customer Name -->
+            <div>
+              <label for="checkout-name" class="block text-[11px] font-bold text-slate-700 mb-1">Full Name <span class="text-rose-500">*</span></label>
+              <input 
+                type="text" 
+                id="checkout-name" 
+                required 
+                placeholder="e.g. Alex Morgan" 
+                class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+              />
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+              <label for="checkout-phone" class="block text-[11px] font-bold text-slate-700 mb-1">Phone Number <span class="text-rose-500">*</span></label>
+              <input 
+                type="tel" 
+                id="checkout-phone" 
+                required 
+                placeholder="e.g. (555) 345-6789" 
+                class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+              />
+            </div>
+
+            <!-- Delivery Address -->
+            <div>
+              <label for="checkout-address" class="block text-[11px] font-bold text-slate-700 mb-1">Delivery Address <span class="text-rose-500">*</span></label>
+              <textarea 
+                id="checkout-address" 
+                required 
+                rows="2" 
+                placeholder="Street address, building, apt/unit number..." 
+                class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Payment Method Indicator (Cash on Delivery) -->
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">Payment Method</label>
+              <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-xl border border-slate-200/80">
+                <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <path d="M6 12h.01M18 12h.01"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-slate-900">Cash on Delivery (COD)</span>
+                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Active</span>
+                  </div>
+                  <p class="text-[10px] text-slate-500">Pay cash or mobile tap directly to the driver upon drop-off.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden submit trigger for programmatic handling -->
+            <button type="submit" id="hidden-checkout-submit" class="hidden"></button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Cart Drawer Footer (Totals & Action) -->
+      <div id="cart-drawer-footer" class="p-5 border-t border-slate-200 bg-slate-50 space-y-3 hidden">
+        <div class="space-y-1.5 text-xs">
+          <div class="flex justify-between text-slate-500">
+            <span>Subtotal</span>
+            <span id="cart-subtotal" class="font-semibold text-slate-800">$0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-500">
+            <span>Delivery Fee</span>
+            <span id="cart-delivery-fee" class="font-semibold text-slate-800">$3.50</span>
+          </div>
+          <div class="flex justify-between text-slate-500">
+            <span>Estimated Tax (8%)</span>
+            <span id="cart-tax" class="font-semibold text-slate-800">$0.00</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
+            <span>Total to Pay</span>
+            <span id="cart-grand-total" class="text-brand-600 font-black text-base">$0.00</span>
+          </div>
+        </div>
+
+        <button 
+          onclick="document.getElementById('hidden-checkout-submit').click()" 
+          id="place-order-btn"
+          class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-brand-500/25 flex items-center justify-center gap-2">
+          <span>Place Order (Cash on Delivery)</span>
+          <span id="btn-total-preview" class="font-extrabold">· $0.00</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- ORDER SUCCESS CONFIRMATION MODAL -->
+    <!-- ========================================== -->
+    <div id="order-success-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+      <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Animated Success Badge -->
+        <div class="w-16 h-16 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <div>
+          <div class="inline-block px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold mb-2" id="modal-order-id-badge">
+            Order #FC-8941 Confirmed
+          </div>
+          <h3 class="text-2xl font-black text-slate-900">Thank You for Your Order!</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+            Our kitchen team has received your order and is firing up the grill right now.
+          </p>
+        </div>
+
+        <!-- Order Summary Card -->
+        <div class="bg-slate-50 rounded-2xl p-4 text-left border border-slate-200/80 space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Customer:</span>
+            <span class="font-bold text-slate-800" id="modal-customer-name">Alex Morgan</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Delivery Address:</span>
+            <span class="font-semibold text-slate-800 text-right max-w-xs truncate" id="modal-delivery-addr">123 Main St, Apt 4B</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Payment:</span>
+            <span class="font-bold text-emerald-600">Cash on Delivery</span>
+          </div>
+          <div class="flex justify-between pt-2 border-t border-slate-200">
+            <span class="text-slate-700 font-bold">Total Due:</span>
+            <span class="font-black text-brand-600 text-sm" id="modal-total-amount">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Simulated Kitchen Progress Timeline -->
+        <div class="py-2">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-2">
+            <span class="text-brand-600">1. Order Placed</span>
+            <span class="text-brand-600">2. Kitchen Prep</span>
+            <span class="text-slate-400">3. In Transit</span>
+            <span class="text-slate-400">4. Delivered</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden flex">
+            <div class="bg-brand-500 w-1/2 h-full rounded-full animate-pulse"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 font-medium">Estimated arrival in <span class="font-bold text-slate-700">25–35 minutes</span></p>
+        </div>
+
+        <!-- Modal Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-2">
+          <button onclick="app.closeSuccessModalAndGoAdmin()" class="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all">
+            Track in Admin Dashboard &rarr;
+          </button>
+          <button onclick="app.closeSuccessModal()" class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all">
+            Order More Food
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ========================================== -->
+    <!-- VANILLA JAVASCRIPT APPLICATION CORE -->
+    <!-- ========================================== -->
+    <script>
+      /**
+       * FlavorCraft Restaurant Ordering System
+       * Pure Vanilla JavaScript - Zero external framework dependencies
+       * In-memory local state management with localStorage convenience persistence.
+       */
+
+      // Sample Initial Menu Catalog
+      const INITIAL_MENU_ITEMS = [
+        {
+          id: 'item-1',
+          title: 'The Truffle Smash Burger',
+          category: 'burgers',
+          price: 13.99,
+          description: 'Two seared smashed angus beef patties, black truffle garlic aioli, aged sharp cheddar, caramelized shallots on toasted brioche.',
+          image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80',
+          badge: 'Chef Special'
+        },
+        {
+          id: 'item-2',
+          title: 'Smoked Bacon & Gouda Double',
+          category: 'burgers',
+          price: 14.99,
+          description: 'Double Angus beef patties, thick applewood smoked bacon, smoked gouda, pickled jalapeño coins, house bourbon BBQ sauce.',
+          image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=700&q=80',
+          badge: 'Popular'
+        },
+        {
+          id: 'item-3',
+          title: 'Crispy Nashville Hot Chicken',
+          category: 'burgers',
+          price: 12.99,
+          description: 'Buttermilk soaked fried chicken breast glazed in cayenne hot oil, topped with creamy cider slaw and thick kosher dill pickles.',
+          image: 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=700&q=80',
+          badge: 'Spicy'
+        },
+        {
+          id: 'item-4',
+          title: 'Avocado Green Goddess Burger',
+          category: 'burgers',
+          price: 13.49,
+          description: 'Grilled smash patty, freshly sliced Hass avocado, heirloom tomato, baby butter lettuce, and vibrant tarragon green goddess crema.',
+          image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-5',
+          title: 'Craft Cold Brew Nitro Float',
+          category: 'drinks',
+          price: 5.99,
+          description: 'Single-origin Ethiopian nitro cold brew topped with velvety Madagascar vanilla bean sweet cream and dark cocoa dust.',
+          image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=700&q=80',
+          badge: 'Staff Pick'
+        },
+        {
+          id: 'item-6',
+          title: 'Blood Orange & Rosemary Soda',
+          category: 'drinks',
+          price: 4.49,
+          description: 'Fresh squeezed Mediterranean blood orange juice, sparkling artisan mineral water, fresh rosemary syrup, candied citrus wheel.',
+          image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-7',
+          title: 'Wild Berry Hibiscus Iced Tea',
+          category: 'drinks',
+          price: 4.29,
+          description: 'Slow-steeped organic ruby hibiscus tea, muddled wild blackberries, crushed garden mint, and organic wildflower honey.',
+          image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-8',
+          title: 'Yuzu Meyer Lemonade Sparkler',
+          category: 'drinks',
+          price: 4.99,
+          description: 'Japanese yuzu citrus puree blended with fresh squeezed Meyer lemon juice and crisp carbonated soda over crystal clear ice.',
+          image: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-9',
+          title: 'Molten Belgian Chocolate Lava Cake',
+          category: 'desserts',
+          price: 7.99,
+          description: 'Warm 70% dark Belgian chocolate cake with a rich flowing ganache center, served with a scoop of Madagascar vanilla bean cream.',
+          image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=700&q=80',
+          badge: 'House Favorite'
+        },
+        {
+          id: 'item-10',
+          title: 'Salted Caramel Basque Cheesecake',
+          category: 'desserts',
+          price: 7.49,
+          description: 'Caramelized burnt basque style cheesecake with creamy custard center, drizzled with Maldon sea salt caramel reduction.',
+          image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-11',
+          title: 'Uji Matcha Green Tea Tiramisu',
+          category: 'desserts',
+          price: 6.99,
+          description: 'Savoiardi ladyfingers steeped in ceremonial Kyoto matcha, layered with whipped Italian mascarpone and dusted green tea powder.',
+          image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=700&q=80'
+        },
+        {
+          id: 'item-12',
+          title: 'Crispy Cinnamon Churro Bites',
+          category: 'desserts',
+          price: 6.49,
+          description: 'Golden fried Spanish dough tossed in aromatic cinnamon and demerara sugar, served with warm spiced dulce de leche dip.',
+          image: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?auto=format&fit=crop&w=700&q=80'
+        }
+      ];
+
+      // Sample Initial Orders for Admin View
+      const INITIAL_ORDERS = [
+        {
+          id: 'FC-9102',
+          date: new Date(Date.now() - 1000 * 60 * 18).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          customer: {
+            name: 'Sarah Jenkins',
+            phone: '(555) 892-1234',
+            address: '450 Sunset Blvd, Apt 12'
+          },
+          items: [
+            { id: 'item-1', title: 'The Truffle Smash Burger', quantity: 2, price: 13.99 },
+            { id: 'item-5', title: 'Craft Cold Brew Nitro Float', quantity: 1, price: 5.99 }
+          ],
+          subtotal: 33.97,
+          deliveryFee: 3.50,
+          tax: 2.72,
+          total: 40.19,
+          paymentMethod: 'Cash on Delivery',
+          status: 'preparing'
+        },
+        {
+          id: 'FC-9101',
+          date: new Date(Date.now() - 1000 * 60 * 42).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          customer: {
+            name: 'Marcus Chen',
+            phone: '(555) 431-9988',
+            address: '1088 Pine Street, Suite 4B'
+          },
+          items: [
+            { id: 'item-2', title: 'Smoked Bacon & Gouda Double', quantity: 1, price: 14.99 },
+            { id: 'item-9', title: 'Molten Belgian Chocolate Lava Cake', quantity: 1, price: 7.99 },
+            { id: 'item-6', title: 'Blood Orange & Rosemary Soda', quantity: 2, price: 4.49 }
+          ],
+          subtotal: 31.96,
+          deliveryFee: 3.50,
+          tax: 2.56,
+          total: 38.02,
+          paymentMethod: 'Cash on Delivery',
+          status: 'delivered'
+        },
+        {
+          id: 'FC-9103',
+          date: new Date(Date.now() - 1000 * 60 * 5).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          customer: {
+            name: 'Emily Watson',
+            phone: '(555) 674-0022',
+            address: '224 Oak Ave, Unit 3'
+          },
+          items: [
+            { id: 'item-3', title: 'Crispy Nashville Hot Chicken', quantity: 1, price: 12.99 },
+            { id: 'item-7', title: 'Wild Berry Hibiscus Iced Tea', quantity: 1, price: 4.29 }
+          ],
+          subtotal: 17.28,
+          deliveryFee: 3.50,
+          tax: 1.38,
+          total: 22.16,
+          paymentMethod: 'Cash on Delivery',
+          status: 'pending'
+        }
+      ];
+
+      // Central Application Class
+      class RestaurantApp {
+        constructor() {
+          // Local In-Memory State
+          this.state = {
+            view: 'customer', // 'customer' | 'admin'
+            selectedCategory: 'all', // 'all' | 'burgers' | 'drinks' | 'desserts'
+            searchQuery: '',
+            cart: [], // [{ id, quantity }]
+            menuItems: [...INITIAL_MENU_ITEMS],
+            orders: [...INITIAL_ORDERS],
+            orderFilter: 'all', // 'all' | 'pending' | 'preparing' | 'delivered'
+            isCartOpen: false,
+            lastPlacedOrder: null
+          };
+
+          this.init();
+        }
+
+        init() {
+          this.renderAll();
+          this.setupKeyboardListeners();
+        }
+
+        setupKeyboardListeners() {
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              if (this.state.isCartOpen) this.toggleCart(false);
+              this.closeSuccessModal();
+            }
+          });
+        }
+
+        // ==========================================
+        // VIEW NAVIGATION
+        // ==========================================
+        switchView(targetView) {
+          this.state.view = targetView;
+          
+          const customerView = document.getElementById('customer-view');
+          const adminView = document.getElementById('admin-view');
+          const adminBanner = document.getElementById('admin-mode-banner');
+          const toggleCustBtn = document.getElementById('toggle-customer-btn');
+          const toggleAdminBtn = document.getElementById('toggle-admin-btn');
+
+          if (targetView === 'customer') {
+            customerView.classList.remove('hidden');
+            adminView.classList.add('hidden');
+            adminBanner.classList.add('hidden');
+
+            toggleCustBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 bg-white text-slate-900 shadow-xs";
+            toggleAdminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 text-slate-600 hover:text-slate-900";
+          } else {
+            customerView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            adminBanner.classList.remove('hidden');
+
+            toggleCustBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 text-slate-600 hover:text-slate-900";
+            toggleAdminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 bg-slate-900 text-white shadow-xs";
+          }
+
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          this.renderAll();
+        }
+
+        // ==========================================
+        // CATEGORY & SEARCH FILTERING
+        // ==========================================
+        setCategory(category) {
+          this.state.selectedCategory = category;
+          
+          // Update Tab button active state
+          document.querySelectorAll('.cat-tab').forEach(btn => {
+            const cat = btn.getAttribute('data-cat');
+            if (cat === category) {
+              btn.className = 'cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-brand-600 text-white shadow-xs';
+            } else {
+              btn.className = 'cat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 bg-white border border-slate-200';
+            }
+          });
+
+          this.renderMenuGrid();
+        }
+
+        handleSearch(query) {
+          this.state.searchQuery = query.trim().toLowerCase();
+          const clearBtn = document.getElementById('clear-search-btn');
+          if (this.state.searchQuery) {
+            clearBtn.classList.remove('hidden');
+          } else {
+            clearBtn.classList.add('hidden');
+          }
+          this.renderMenuGrid();
+        }
+
+        clearSearch() {
+          const input = document.getElementById('menu-search-input');
+          if (input) input.value = '';
+          this.handleSearch('');
+        }
+
+        resetFilters() {
+          this.clearSearch();
+          this.setCategory('all');
+        }
+
+        // ==========================================
+        // CART ACTIONS
+        // ==========================================
+        toggleCart(isOpen) {
+          this.state.isCartOpen = isOpen;
+          const drawer = document.getElementById('cart-drawer');
+          const backdrop = document.getElementById('cart-drawer-backdrop');
+
+          if (isOpen) {
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            backdrop.classList.add('opacity-100');
+            drawer.classList.remove('translate-x-full');
+            document.body.classList.add('overflow-hidden');
+          } else {
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawer.classList.add('translate-x-full');
+            document.body.classList.remove('overflow-hidden');
+          }
+        }
+
+        addToCart(itemId) {
+          const item = this.state.menuItems.find(i => i.id === itemId);
+          if (!item) return;
+
+          const existing = this.state.cart.find(c => c.id === itemId);
+          if (existing) {
+            existing.quantity += 1;
+          } else {
+            this.state.cart.push({ id: itemId, quantity: 1 });
+          }
+
+          this.updateCartUI();
+          this.renderMenuGrid(); // Update badge on card
+          this.showToast(`Added <strong>${item.title}</strong> to cart!`, 'cart');
+        }
+
+        updateItemQuantity(itemId, delta) {
+          const index = this.state.cart.findIndex(c => c.id === itemId);
+          if (index === -1) return;
+
+          const newQty = this.state.cart[index].quantity + delta;
+          if (newQty <= 0) {
+            this.state.cart.splice(index, 1);
+          } else {
+            this.state.cart[index].quantity = newQty;
+          }
+
+          this.updateCartUI();
+          this.renderMenuGrid();
+        }
+
+        removeFromCart(itemId) {
+          this.state.cart = this.state.cart.filter(c => c.id !== itemId);
+          this.updateCartUI();
+          this.renderMenuGrid();
+        }
+
+        clearCart() {
+          this.state.cart = [];
+          this.updateCartUI();
+          this.renderMenuGrid();
+        }
+
+        getCartTotals() {
+          let subtotal = 0;
+          let totalCount = 0;
+
+          for (const c of this.state.cart) {
+            const item = this.state.menuItems.find(m => m.id === c.id);
+            if (item) {
+              subtotal += item.price * c.quantity;
+              totalCount += c.quantity;
+            }
+          }
+
+          const freeDeliveryThreshold = 35.00;
+          const deliveryFee = subtotal >= freeDeliveryThreshold || subtotal === 0 ? 0.00 : 3.50;
+          const tax = subtotal * 0.08;
+          const total = subtotal + deliveryFee + tax;
+
+          return { subtotal, deliveryFee, tax, total, totalCount, freeDeliveryThreshold };
+        }
+
+        // ==========================================
+        // CHECKOUT & ORDERS
+        // ==========================================
+        handlePlaceOrder(event) {
+          event.preventDefault();
+
+          if (this.state.cart.length === 0) {
+            this.showToast('Your cart is empty!', 'error');
+            return;
+          }
+
+          const nameInput = document.getElementById('checkout-name');
+          const phoneInput = document.getElementById('checkout-phone');
+          const addressInput = document.getElementById('checkout-address');
+
+          const name = nameInput.value.trim();
+          const phone = phoneInput.value.trim();
+          const address = addressInput.value.trim();
+
+          if (!name || !phone || !address) {
+            this.showToast('Please complete all delivery fields', 'error');
+            return;
+          }
+
+          const { subtotal, deliveryFee, tax, total } = this.getCartTotals();
+
+          // Construct ordered items snapshot
+          const orderedItems = this.state.cart.map(c => {
+            const m = this.state.menuItems.find(i => i.id === c.id);
+            return {
+              id: c.id,
+              title: m ? m.title : 'Food Item',
+              quantity: c.quantity,
+              price: m ? m.price : 0
+            };
+          });
+
+          // Generate sequential / randomized order ID
+          const orderNum = Math.floor(1000 + Math.random() * 9000);
+          const orderId = `FC-${orderNum}`;
+
+          const newOrder = {
+            id: orderId,
+            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            customer: { name, phone, address },
+            items: orderedItems,
+            subtotal,
+            deliveryFee,
+            tax,
+            total,
+            paymentMethod: 'Cash on Delivery',
+            status: 'pending'
+          };
+
+          // In-memory prepend
+          this.state.orders.unshift(newOrder);
+          this.state.lastPlacedOrder = newOrder;
+
+          // Clear cart
+          this.state.cart = [];
+          this.updateCartUI();
+          this.renderMenuGrid();
+          this.toggleCart(false);
+
+          // Reset checkout form
+          document.getElementById('checkout-form').reset();
+
+          // Update Admin stats & table
+          this.renderAdminView();
+
+          // Show confirmation modal
+          this.showOrderConfirmationModal(newOrder);
+        }
+
+        showOrderConfirmationModal(order) {
+          const modal = document.getElementById('order-success-modal');
+          document.getElementById('modal-order-id-badge').textContent = `Order #${order.id} Confirmed`;
+          document.getElementById('modal-customer-name').textContent = order.customer.name;
+          document.getElementById('modal-delivery-addr').textContent = order.customer.address;
+          document.getElementById('modal-total-amount').textContent = `$${order.total.toFixed(2)}`;
+
+          modal.classList.remove('hidden');
+          setTimeout(() => {
+            modal.classList.remove('opacity-0');
+          }, 10);
+        }
+
+        closeSuccessModal() {
+          const modal = document.getElementById('order-success-modal');
+          modal.classList.add('opacity-0');
+          setTimeout(() => {
+            modal.classList.add('hidden');
+          }, 200);
+        }
+
+        closeSuccessModalAndGoAdmin() {
+          this.closeSuccessModal();
+          this.switchView('admin');
+        }
+
+        // ==========================================
+        // ADMIN MANAGEMENT
+        // ==========================================
+        updateOrderStatus(orderId, newStatus) {
+          const order = this.state.orders.find(o => o.id === orderId);
+          if (order) {
+            order.status = newStatus;
+            this.renderAdminView();
+            this.showToast(`Order #${orderId} marked as <strong>${newStatus.toUpperCase()}</strong>`, 'info');
+          }
+        }
+
+        setOrderFilter(status) {
+          this.state.orderFilter = status;
+          document.querySelectorAll('.order-filter-btn').forEach(btn => {
+            const s = btn.getAttribute('data-status');
+            if (s === status) {
+              btn.className = 'order-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white';
+            } else {
+              btn.className = 'order-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100';
+            }
+          });
+          this.renderAdminOrdersTable();
+        }
+
+        handleAddNewMenuItem(event) {
+          event.preventDefault();
+
+          const titleInput = document.getElementById('item-title');
+          const catSelect = document.getElementById('item-category');
+          const priceInput = document.getElementById('item-price');
+          const descInput = document.getElementById('item-description');
+          const imageInput = document.getElementById('item-image');
+
+          const title = titleInput.value.trim();
+          const category = catSelect.value;
+          const price = parseFloat(priceInput.value);
+          const description = descInput.value.trim();
+          const image = imageInput.value.trim();
+
+          if (!title || isNaN(price) || !description || !image) {
+            this.showToast('Please complete all menu item fields', 'error');
+            return;
+          }
+
+          const newItem = {
+            id: 'item-' + Date.now(),
+            title,
+            category,
+            price,
+            description,
+            image,
+            badge: 'New Dish'
+          };
+
+          this.state.menuItems.unshift(newItem);
+
+          // Reset form
+          document.getElementById('add-menu-item-form').reset();
+
+          this.renderAll();
+          this.showToast(`Published <strong>${title}</strong> to the food menu!`, 'success');
+        }
+
+        fillSampleImage(type) {
+          const imgInput = document.getElementById('item-image');
+          const catSelect = document.getElementById('item-category');
+          const titleInput = document.getElementById('item-title');
+          const priceInput = document.getElementById('item-price');
+          const descInput = document.getElementById('item-description');
+
+          if (type === 'burger') {
+            imgInput.value = 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=700&q=80';
+            catSelect.value = 'burgers';
+            if (!titleInput.value) titleInput.value = 'Smoky Hickory BBQ Smash Burger';
+            if (!priceInput.value) priceInput.value = '14.50';
+            if (!descInput.value) descInput.value = 'Hickory-smoked beef patty, aged cheddar, crispy fried shallots, and house-made Kansas City barbecue glaze.';
+          } else if (type === 'drink') {
+            imgInput.value = 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=700&q=80';
+            catSelect.value = 'drinks';
+            if (!titleInput.value) titleInput.value = 'Artisan Passionfruit Mojito Fizz';
+            if (!priceInput.value) priceInput.value = '4.95';
+            if (!descInput.value) descInput.value = 'Crushed fresh passionfruit pulp, hand-slapped organic mint, sparkling soda, and lime wheel.';
+          } else if (type === 'coffee') {
+            imgInput.value = 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=700&q=80';
+            catSelect.value = 'drinks';
+            if (!titleInput.value) titleInput.value = 'Vanilla Sweet Cream Cold Brew';
+            if (!priceInput.value) priceInput.value = '5.50';
+            if (!descInput.value) descInput.value = 'Slow-steeped cold coffee concentrate crowned with velvety handcrafted sweet cream.';
+          } else if (type === 'dessert') {
+            imgInput.value = 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=700&q=80';
+            catSelect.value = 'desserts';
+            if (!titleInput.value) titleInput.value = 'Salted Caramel Pecan Tart';
+            if (!priceInput.value) priceInput.value = '7.50';
+            if (!descInput.value) descInput.value = 'Buttery shortbread crust filled with rich toasted pecan caramel and sea salt flakes.';
+          }
+        }
+
+        deleteMenuItem(itemId) {
+          if (confirm('Are you sure you want to remove this dish from the menu?')) {
+            this.state.menuItems = this.state.menuItems.filter(i => i.id !== itemId);
+            this.state.cart = this.state.cart.filter(c => c.id !== itemId);
+            this.renderAll();
+            this.showToast('Item deleted from menu', 'info');
+          }
+        }
+
+        seedSampleOrder() {
+          const names = ['Taylor Swift', 'Jordan Peterson', 'Elena Rostova', 'David Miller', 'Samantha Fox'];
+          const randomName = names[Math.floor(Math.random() * names.length)];
+          const randomItem = this.state.menuItems[Math.floor(Math.random() * this.state.menuItems.length)];
+          
+          const orderNum = Math.floor(1000 + Math.random() * 9000);
+          const subtotal = randomItem.price;
+          const deliveryFee = 3.50;
+          const tax = subtotal * 0.08;
+          const total = subtotal + deliveryFee + tax;
+
+          const fakeOrder = {
+            id: `FC-${orderNum}`,
+            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            customer: {
+              name: randomName,
+              phone: '(555) ' + Math.floor(100 + Math.random() * 900) + '-' + Math.floor(1000 + Math.random() * 9000),
+              address: `${Math.floor(100 + Math.random() * 900)} Riverside Dr, Apt ${Math.floor(1 + Math.random() * 20)}`
+            },
+            items: [{ id: randomItem.id, title: randomItem.title, quantity: 1, price: randomItem.price }],
+            subtotal,
+            deliveryFee,
+            tax,
+            total,
+            paymentMethod: 'Cash on Delivery',
+            status: 'pending'
+          };
+
+          this.state.orders.unshift(fakeOrder);
+          this.renderAdminView();
+          this.showToast(`New simulated order received from <strong>${randomName}</strong>!`, 'success');
+        }
+
+        // ==========================================
+        // RENDERING LOGIC
+        // ==========================================
+        renderAll() {
+          this.renderCategoryCounts();
+          this.renderMenuGrid();
+          this.updateCartUI();
+          this.renderAdminView();
+        }
+
+        renderCategoryCounts() {
+          const allCount = this.state.menuItems.length;
+          const burgerCount = this.state.menuItems.filter(i => i.category === 'burgers').length;
+          const drinkCount = this.state.menuItems.filter(i => i.category === 'drinks').length;
+          const dessertCount = this.state.menuItems.filter(i => i.category === 'desserts').length;
+
+          const elAll = document.getElementById('cat-count-all');
+          const elBurgers = document.getElementById('cat-count-burgers');
+          const elDrinks = document.getElementById('cat-count-drinks');
+          const elDesserts = document.getElementById('cat-count-desserts');
+
+          if (elAll) elAll.textContent = allCount;
+          if (elBurgers) elBurgers.textContent = burgerCount;
+          if (elDrinks) elDrinks.textContent = drinkCount;
+          if (elDesserts) elDesserts.textContent = dessertCount;
+        }
+
+        renderMenuGrid() {
+          const container = document.getElementById('food-menu-grid');
+          const emptyState = document.getElementById('menu-empty-state');
+          if (!container) return;
+
+          let filtered = this.state.menuItems;
+
+          // Category filter
+          if (this.state.selectedCategory !== 'all') {
+            filtered = filtered.filter(item => item.category === this.state.selectedCategory);
+          }
+
+          // Search query filter
+          if (this.state.searchQuery) {
+            filtered = filtered.filter(item => 
+              item.title.toLowerCase().includes(this.state.searchQuery) ||
+              item.description.toLowerCase().includes(this.state.searchQuery) ||
+              item.category.toLowerCase().includes(this.state.searchQuery)
+            );
+          }
+
+          if (filtered.length === 0) {
+            container.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+          }
+
+          emptyState.classList.add('hidden');
+
+          const html = filtered.map(item => {
+            const inCart = this.state.cart.find(c => c.id === item.id);
+            const qty = inCart ? inCart.quantity : 0;
+            
+            // Format category name
+            const catLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
+
+            return `
+              <div class="group flex flex-col bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden">
+                
+                <!-- Food Image Container -->
+                <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-100">
+                  <img 
+                    src="${item.image}" 
+                    alt="${this.escapeHtml(item.title)}" 
+                    loading="lazy"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'"
+                  />
+                  
+                  <!-- Top Badge (if any) -->
+                  ${item.badge ? `
+                    <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                      ${item.badge}
+                    </div>
+                  ` : ''}
+
+                  <!-- In-cart quantity indicator -->
+                  ${qty > 0 ? `
+                    <div class="absolute top-3 right-3 bg-brand-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                      <span>✓ In Cart (${qty})</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- Food Card Content -->
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-center gap-2 text-xs text-slate-600 mb-1">
+                      <span class="font-bold uppercase tracking-wider text-[11px]">${catLabel}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>Freshly Prepared</span>
+                    </div>
+
+                    <h3 class="font-extrabold text-base text-slate-900 tracking-tight leading-snug mb-1.5 group-hover:text-brand-600 transition-colors">
+                      ${this.escapeHtml(item.title)}
+                    </h3>
+
+                    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                      ${this.escapeHtml(item.description)}
+                    </p>
+                  </div>
+
+                  <!-- Price and Add to Cart Button -->
+                  <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div>
+                      <span class="text-xs text-slate-400 block -mb-0.5 font-medium">Price</span>
+                      <span class="text-lg font-black text-slate-900">$${item.price.toFixed(2)}</span>
+                    </div>
+
+                    ${qty > 0 ? `
+                      <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <button onclick="app.updateItemQuantity('${item.id}', -1)" title="Decrease" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition-colors shadow-2xs">
+                          -
+                        </button>
+                        <span class="w-6 text-center font-extrabold text-xs text-slate-900">${qty}</span>
+                        <button onclick="app.updateItemQuantity('${item.id}', 1)" title="Increase" class="w-7 h-7 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold flex items-center justify-center transition-colors shadow-2xs">
+                          +
+                        </button>
+                      </div>
+                    ` : `
+                      <button 
+                        onclick="app.addToCart('${item.id}')" 
+                        class="flex items-center gap-2 px-3.5 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold text-xs rounded-xl transition-all shadow-xs shadow-brand-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        <span>Add to Cart</span>
+                      </button>
+                    `}
+                  </div>
+
+                </div>
+
+              </div>
+            `;
+          }).join('');
+
+          container.innerHTML = html;
+        }
+
+        updateCartUI() {
+          const { subtotal, deliveryFee, tax, total, totalCount, freeDeliveryThreshold } = this.getCartTotals();
+
+          // Header badges
+          const headerBadge = document.getElementById('header-cart-badge');
+          const headerTotal = document.getElementById('header-cart-total');
+          const drawerCountText = document.getElementById('drawer-item-count-text');
+          const clearCartBtn = document.getElementById('clear-cart-btn');
+
+          if (headerBadge) {
+            headerBadge.textContent = totalCount;
+            // Pop animation on change
+            headerBadge.classList.add('scale-125');
+            setTimeout(() => headerBadge.classList.remove('scale-125'), 180);
+          }
+          if (headerTotal) headerTotal.textContent = `$${subtotal.toFixed(2)}`;
+          if (drawerCountText) drawerCountText.textContent = `${totalCount} item${totalCount === 1 ? '' : 's'} in order`;
+          if (clearCartBtn) {
+            if (totalCount > 0) clearCartBtn.classList.remove('hidden');
+            else clearCartBtn.classList.add('hidden');
+          }
+
+          // Cart Drawer items list
+          const listContainer = document.getElementById('cart-items-list');
+          const emptyView = document.getElementById('cart-empty-view');
+          const checkoutSection = document.getElementById('cart-checkout-section');
+          const footerSection = document.getElementById('cart-drawer-footer');
+
+          if (this.state.cart.length === 0) {
+            if (listContainer) listContainer.innerHTML = '';
+            if (emptyView) emptyView.classList.remove('hidden');
+            if (checkoutSection) checkoutSection.classList.add('hidden');
+            if (footerSection) footerSection.classList.add('hidden');
+          } else {
+            if (emptyView) emptyView.classList.add('hidden');
+            if (checkoutSection) checkoutSection.classList.remove('hidden');
+            if (footerSection) footerSection.classList.remove('hidden');
+
+            const itemsHtml = this.state.cart.map(c => {
+              const item = this.state.menuItems.find(m => m.id === c.id);
+              if (!item) return '';
+
+              const lineTotal = item.price * c.quantity;
+
+              return `
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <img src="${item.image}" alt="${this.escapeHtml(item.title)}" class="w-14 h-14 rounded-lg object-cover shrink-0" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'" />
+                  
+                  <div class="flex-1 min-w-0">
+                    <h5 class="font-bold text-xs text-slate-900 truncate leading-snug">${this.escapeHtml(item.title)}</h5>
+                    <span class="text-[11px] text-slate-400">$${item.price.toFixed(2)} each</span>
+                    
+                    <div class="flex items-center justify-between mt-1.5">
+                      <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-1 py-0.5">
+                        <button onclick="app.updateItemQuantity('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 font-bold text-xs">-</button>
+                        <span class="text-xs font-bold text-slate-800 px-1">${c.quantity}</span>
+                        <button onclick="app.updateItemQuantity('${item.id}', 1)" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 font-bold text-xs">+</button>
+                      </div>
+
+                      <span class="font-extrabold text-xs text-slate-900">$${lineTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <button onclick="app.removeFromCart('${item.id}')" title="Remove item" class="text-slate-300 hover:text-rose-500 p-1 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              `;
+            }).join('');
+
+            if (listContainer) listContainer.innerHTML = itemsHtml;
+          }
+
+          // Delivery banner logic
+          const freeDeliveryBanner = document.getElementById('free-delivery-banner');
+          const freeDeliveryText = document.getElementById('free-delivery-text');
+          const freeDeliveryBar = document.getElementById('free-delivery-bar');
+          const freeDeliveryPercent = document.getElementById('free-delivery-percent');
+
+          if (freeDeliveryBanner) {
+            if (subtotal >= freeDeliveryThreshold) {
+              freeDeliveryText.innerHTML = '🎉 You unlocked <strong class="text-emerald-800">FREE Delivery!</strong>';
+              freeDeliveryBar.style.width = '100%';
+              freeDeliveryBar.className = 'bg-emerald-500 h-full w-full transition-all duration-300';
+              freeDeliveryPercent.textContent = '100%';
+            } else {
+              const diff = freeDeliveryThreshold - subtotal;
+              const percent = Math.min(100, Math.round((subtotal / freeDeliveryThreshold) * 100));
+              freeDeliveryText.innerHTML = `Add <strong>$${diff.toFixed(2)}</strong> more for FREE delivery`;
+              freeDeliveryBar.style.width = `${percent}%`;
+              freeDeliveryBar.className = 'bg-brand-500 h-full transition-all duration-300';
+              freeDeliveryPercent.textContent = `${percent}%`;
+            }
+          }
+
+          // Footer calculation labels
+          const elSubtotal = document.getElementById('cart-subtotal');
+          const elFee = document.getElementById('cart-delivery-fee');
+          const elTax = document.getElementById('cart-tax');
+          const elGrandTotal = document.getElementById('cart-grand-total');
+          const elBtnPreview = document.getElementById('btn-total-preview');
+
+          if (elSubtotal) elSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+          if (elFee) elFee.textContent = deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`;
+          if (elTax) elTax.textContent = `$${tax.toFixed(2)}`;
+          if (elGrandTotal) elGrandTotal.textContent = `$${total.toFixed(2)}`;
+          if (elBtnPreview) elBtnPreview.textContent = `· $${total.toFixed(2)}`;
+        }
+
+        renderAdminView() {
+          // KPI Stats
+          let totalRevenue = 0;
+          let activeOrdersCount = 0;
+
+          for (const o of this.state.orders) {
+            totalRevenue += o.total;
+            if (o.status === 'pending' || o.status === 'preparing' || o.status === 'out_for_delivery') {
+              activeOrdersCount++;
+            }
+          }
+
+          const statRevenue = document.getElementById('admin-stat-revenue');
+          const statOrders = document.getElementById('admin-stat-orders');
+          const statActive = document.getElementById('admin-stat-active');
+          const statItems = document.getElementById('admin-stat-items');
+
+          if (statRevenue) statRevenue.textContent = `$${totalRevenue.toFixed(2)}`;
+          if (statOrders) statOrders.textContent = this.state.orders.length;
+          if (statActive) statActive.textContent = activeOrdersCount;
+          if (statItems) statItems.textContent = this.state.menuItems.length;
+
+          this.renderAdminOrdersTable();
+          this.renderAdminInventory();
+        }
+
+        renderAdminOrdersTable() {
+          const tbody = document.getElementById('admin-orders-table-body');
+          const emptyState = document.getElementById('admin-orders-empty');
+          if (!tbody) return;
+
+          // Status counts
+          const countAll = this.state.orders.length;
+          const countPending = this.state.orders.filter(o => o.status === 'pending').length;
+          const countPreparing = this.state.orders.filter(o => o.status === 'preparing').length;
+          const countDelivered = this.state.orders.filter(o => o.status === 'delivered').length;
+
+          const elCAll = document.getElementById('count-order-all');
+          const elCPending = document.getElementById('count-order-pending');
+          const elCPrep = document.getElementById('count-order-preparing');
+          const elCDeliv = document.getElementById('count-order-delivered');
+
+          if (elCAll) elCAll.textContent = countAll;
+          if (elCPending) elCPending.textContent = countPending;
+          if (elCPrep) elCPrep.textContent = countPreparing;
+          if (elCDeliv) elCDeliv.textContent = countDelivered;
+
+          let ordersToDisplay = this.state.orders;
+          if (this.state.orderFilter !== 'all') {
+            ordersToDisplay = ordersToDisplay.filter(o => o.status === this.state.orderFilter);
+          }
+
+          if (ordersToDisplay.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+          }
+
+          emptyState.classList.add('hidden');
+
+          const rowsHtml = ordersToDisplay.map(order => {
+            // Status badge color configuration
+            const statusConfig = {
+              pending: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200' },
+              preparing: { label: 'Preparing', bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
+              out_for_delivery: { label: 'Out for Delivery', bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
+              delivered: { label: 'Delivered', bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200' },
+              cancelled: { label: 'Cancelled', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' }
+            };
+
+            const conf = statusConfig[order.status] || statusConfig.pending;
+
+            const itemsListString = order.items.map(i => `${i.quantity}x ${i.title}`).join(', ');
+
+            return `
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                
+                <!-- Order ID & Time -->
+                <td class="py-3.5 px-4 align-top">
+                  <span class="font-black text-slate-900 block font-mono text-xs">${order.id}</span>
+                  <span class="text-[11px] text-slate-400">${order.date}</span>
+                </td>
+
+                <!-- Customer Details -->
+                <td class="py-3.5 px-4 align-top">
+                  <span class="font-extrabold text-slate-900 block">${this.escapeHtml(order.customer.name)}</span>
+                  <span class="text-[11px] text-slate-500 block">${this.escapeHtml(order.customer.phone)}</span>
+                  <span class="text-[11px] text-slate-400 block max-w-xs truncate" title="${this.escapeHtml(order.customer.address)}">${this.escapeHtml(order.customer.address)}</span>
+                </td>
+
+                <!-- Ordered Items Breakdown -->
+                <td class="py-3.5 px-4 align-top max-w-xs">
+                  <div class="space-y-1">
+                    ${order.items.map(item => `
+                      <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-medium truncate mr-2">${item.quantity}x ${this.escapeHtml(item.title)}</span>
+                        <span class="text-slate-400 font-mono shrink-0">$${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </td>
+
+                <!-- Order Total & Payment Method -->
+                <td class="py-3.5 px-4 align-top whitespace-nowrap">
+                  <span class="font-black text-slate-900 text-sm block">$${order.total.toFixed(2)}</span>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 mt-0.5">
+                    💵 COD
+                  </span>
+                </td>
+
+                <!-- Status Select / Control -->
+                <td class="py-3.5 px-4 align-top whitespace-nowrap">
+                  <div class="flex flex-col gap-1.5">
+                    <select 
+                      onchange="app.updateOrderStatus('${order.id}', this.value)" 
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-bold ${conf.bg} ${conf.text} border ${conf.border} focus:outline-none cursor-pointer">
+                      <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                      <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>Preparing</option>
+                      <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
+                      <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                      <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+
+                    <div class="flex gap-1 text-[10px]">
+                      ${order.status === 'pending' ? `
+                        <button onclick="app.updateOrderStatus('${order.id}', 'preparing')" class="px-2 py-0.5 bg-blue-50 text-blue-700 font-bold rounded hover:bg-blue-100 transition-colors">Start Prep</button>
+                      ` : ''}
+                      ${order.status === 'preparing' ? `
+                        <button onclick="app.updateOrderStatus('${order.id}', 'out_for_delivery')" class="px-2 py-0.5 bg-purple-50 text-purple-700 font-bold rounded hover:bg-purple-100 transition-colors">Send Out</button>
+                      ` : ''}
+                      ${order.status === 'out_for_delivery' ? `
+                        <button onclick="app.updateOrderStatus('${order.id}', 'delivered')" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold rounded hover:bg-emerald-100 transition-colors">Mark Delivered</button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </td>
+
+              </tr>
+            `;
+          }).join('');
+
+          tbody.innerHTML = rowsHtml;
+        }
+
+        renderAdminInventory() {
+          const container = document.getElementById('admin-inventory-grid');
+          const countEl = document.getElementById('admin-inventory-count');
+          if (!container) return;
+
+          if (countEl) countEl.textContent = `${this.state.menuItems.length} Dishes Published`;
+
+          const html = this.state.menuItems.map(item => {
+            return `
+              <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <img src="${item.image}" alt="${this.escapeHtml(item.title)}" class="w-12 h-12 rounded-lg object-cover shrink-0" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80'" />
+                <div class="flex-1 min-w-0">
+                  <h5 class="font-bold text-xs text-slate-900 truncate leading-snug">${this.escapeHtml(item.title)}</h5>
+                  <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                    <span class="capitalize">${item.category}</span>
+                    <span>·</span>
+                    <span class="font-extrabold text-slate-800">$${item.price.toFixed(2)}</span>
+                  </div>
+                </div>
+                <button onclick="app.deleteMenuItem('${item.id}')" title="Delete dish" class="p-1.5 text-slate-300 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            `;
+          }).join('');
+
+          container.innerHTML = html;
+        }
+
+        // ==========================================
+        // TOAST NOTIFICATIONS
+        // ==========================================
+        showToast(message, type = 'info') {
+          const container = document.getElementById('toast-container');
+          if (!container) return;
+
+          const toast = document.createElement('div');
+          toast.className = 'pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs font-medium shadow-xl border border-slate-800 transform translate-y-4 opacity-0 transition-all duration-300 max-w-sm';
+
+          let icon = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          `;
+
+          if (type === 'success' || type === 'cart') {
+            icon = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            `;
+          } else if (type === 'error') {
+            icon = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            `;
+          }
+
+          toast.innerHTML = `
+            ${icon}
+            <div class="flex-1">${message}</div>
+          `;
+
+          container.appendChild(toast);
+
+          // Animate in
+          setTimeout(() => {
+            toast.classList.remove('translate-y-4', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+          }, 10);
+
+          // Animate out & remove
+          setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => {
+              if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+          }, 3200);
+        }
+
+        // Simple HTML sanitizer helper
+        escapeHtml(str) {
+          if (!str) return '';
+          return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+      }
+
+      // Initialize App globally so inline onclick handlers can call it directly
+      window.app = new RestaurantApp();
+    </script>
+  </body>
+</html>
